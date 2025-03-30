@@ -34,11 +34,10 @@ func NewHandler(db map[string]string) http.Handler {
      * func(rw http.ResponseWriter, req *http.Request) => void
     **/
     router.Post("/api/shorten", handleShorten(db))
-    // router.Get("/{code}", handleGet(db))
+    router.Get("/{code}", handleGet(db))
 
     return router
 }
-
 
 
 // Post method that sends the full URL to be shortened
@@ -72,11 +71,17 @@ func handleShorten(db map[string]string) http.HandlerFunc {
 
 
 // Get method I guess will return the shortened url
-// func handleGet(db map[string]string) http.HandlerFunc {
-//     return func (rw http.ResponseWriter, req *http.Request) {
-//         
-//     }
-// }
+func handleGet(db map[string]string) http.HandlerFunc {
+    return func (rw http.ResponseWriter, req *http.Request) {
+        code := chi.URLParam(req, "code")       
+        data, ok := db[code]
+        if !ok {
+            http.Error(rw, "url nao encontrada", http.StatusNotFound)
+            return
+        }
+        http.Redirect(rw, req, data, http.StatusPermanentRedirect)
+    }
+}
 
 /**
  * Auxiliary functions
